@@ -28,11 +28,16 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("New request")
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 
 		resp, _ := json.Marshal(JSONResponse{"Current time: " + time.Now().Format("2006-01-02T15:04:05-0700")})
-		w.Write(resp)
+		_, err := w.Write(resp)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 	})
 
 	logger.Info("Start on :" + port)
@@ -42,15 +47,27 @@ func main() {
 		Handler: router,
 	}
 
-	go serv.ListenAndServe()
+	go func() {
+		err := serv.ListenAndServe()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
 	<-interrupt
 
+	logger.Info("Stopping...")
+
 	timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFunc()
 
-	serv.Shutdown(timeout)
+	err := serv.Shutdown(timeout)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+
+	logger.Info("Stopped")
 }
