@@ -27,5 +27,7 @@ func main() {
 		resp, _ := json.Marshal(JSONResponse{"Hello, world!"})
 		w.Write(resp)
 	})
+
+	logger.Info("Start on :" + port)
 	http.ListenAndServe(":"+port, nil)
 }
