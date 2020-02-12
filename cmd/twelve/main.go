@@ -31,7 +31,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 
-		resp, _ := json.Marshal(JSONResponse{"Hello, world!"})
+		resp, _ := json.Marshal(JSONResponse{"Current time: " + time.Now().Format("2006-01-02T15:04:05-0700")})
 		w.Write(resp)
 	})
 
